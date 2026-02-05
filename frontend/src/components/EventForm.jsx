@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   DndContext, 
   closestCenter,
@@ -7,7 +7,8 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragOverlay
+  DragOverlay,
+  useDroppable
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -16,26 +17,51 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableParticipant } from './SortableParticipant';
-import { Users, Plus } from 'lucide-react';
+import { Users, Plus, GripVertical } from 'lucide-react';
 
-const MOCK_PARTICIPANTS = [
-  { id: 'p1', name: 'Ana Garcia' },
-  { id: 'p2', name: 'Carlos Rodriguez' },
-  { id: 'p3', name: 'Elena Martinez' },
-  { id: 'p4', name: 'David Lopez' },
-  { id: 'p5', name: 'Sofia Ruiz' },
-];
+function Droppable({ id, children, className }) {
+  const { setNodeRef } = useDroppable({ id });
+  
+  return (
+    <div ref={setNodeRef} className={className} id={id}>
+      {children}
+    </div>
+  );
+}
 
 export default function EventForm({ onClose, onSave }) {
   // Lists state
-  const [availableParticipants, setAvailableParticipants] = useState(MOCK_PARTICIPANTS);
+  const [availableParticipants, setAvailableParticipants] = useState([]);
   const [eventParticipants, setEventParticipants] = useState([]);
+  const [title, setTitle] = useState('');
+  const [cost, setCost] = useState('');
   
   // Drag state
   const [activeId, setActiveId] = useState(null);
 
+  useEffect(() => {
+    fetch('http://localhost:3000/participantes')
+        .then(res => res.json())
+        .then(data => {
+            // Map API data to component format if needed, but it matches par_id/par_nombre mostly
+            // Sortable expects 'id' as string/number.
+            const formatted = data.map(p => ({
+                id: p.par_id,
+                name: p.par_nombre,
+                // keep original for later usage
+                ...p 
+            }));
+            setAvailableParticipants(formatted);
+        })
+        .catch(err => console.error("Error fetching participants:", err));
+  }, []);
+
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+        activationConstraint: {
+            distance: 8,
+        },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -55,24 +81,7 @@ export default function EventForm({ onClose, onSave }) {
 
     // Find source and destination containers
     const sourceList = availableParticipants.find(p => p.id === active.id) ? 'available' : 'event';
-    const destList = over.id === 'event-list-droppable' || eventParticipants.find(p => p.id === over.id) ? 'event' : 'available';
-
-    // Move logic (simplified for single sortable context or transferring between lists)
-    // For this UI, let's implement a simpler "Transfer on Click" or "Transfer on Drop" logic 
-    // But since we want "Drag Interactiva", I'll implement transfer between two lists using dnd-kit.
-    
-    // Note: Implementing robust dual-list DnD requires more state management logic. 
-    // To keep it simple and robust for this "Wow" factor:
-    // We will treat "Available" as one SortableContext and "Event" as another
-    // But dnd-kit handles this best with a single state or specialized handlers.
-    
-    // Let's assume simpler logic for this step: Reordering within lists is supported.
-    // Transfering between lists is complex to code in one shot without mistakes. 
-    // I'll stick to a "Drag from Available to Event" visual pattern using buttons for transfer 
-    // OR create a SINGLE list Sortable if that's what user meant?
-    // "cuando crees un evento puedas arrastrar a los participantes" -> Sounds like dragging INTO the event.
-    
-    // Let's implement full dual list drag and drop logic below:
+    const destList = (over.id === 'event-list-droppable' || eventParticipants.find(p => p.id === over.id)) ? 'event' : 'available';
 
     if (sourceList === destList) {
        // Reorder in same list
@@ -95,17 +104,65 @@ export default function EventForm({ onClose, onSave }) {
       // Move between lists
         if (sourceList === 'available') {
             const item = availableParticipants.find(p => p.id === active.id);
-            setAvailableParticipants(items => items.filter(p => p.id !== active.id));
-            setEventParticipants(items => [...items, item]);
+            if (item) {
+                setAvailableParticipants(items => items.filter(p => p.id !== active.id));
+                setEventParticipants(items => [...items, item]);
+            }
         } else {
             const item = eventParticipants.find(p => p.id === active.id);
-            setEventParticipants(items => items.filter(p => p.id !== active.id));
-            setAvailableParticipants(items => [...items, item]);
+            if (item) {
+                setEventParticipants(items => items.filter(p => p.id !== active.id));
+                setAvailableParticipants(items => [...items, item]);
+            }
         }
     }
 
     setActiveId(null);
   }
+
+  const handleSaveInternal = async () => {
+    try {
+        // 1. Create Event
+        // Using query params as per controller implementation: req.query
+        const queryParams = new URLSearchParams({
+            eve_nombre: title,
+            eve_costo: cost || 0,
+            sal_id: 1 // Default Sala ID for now or fetch list
+        });
+        
+        const res = await fetch(`http://localhost:3000/evento?${queryParams}`, {
+            method: 'POST'
+        });
+        const createdEvent = await res.json();
+        
+        // Ensure we handle the Sequelize response structure (might be wrapped)
+        const newEventId = createdEvent.eve_id || createdEvent?.body?.evento?.response?.eve_id || createdEvent?.id ; 
+        
+        if (!newEventId) {
+            console.warn("Could not extract new Event ID", createdEvent);
+            // Fallback or alert if id missing, but let's proceed if possible or just refresh
+        }
+
+        // 2. Assign Participants
+        // API: POST /evento/participante?eve_id=X&par_id=Y&evepar_cantidad=1
+        if (newEventId && eventParticipants.length > 0) {
+            for (const p of eventParticipants) {
+                const pParams = new URLSearchParams({
+                    eve_id: newEventId,
+                    par_id: p.id,
+                    evepar_cantidad: 1 // Default quantity
+                });
+                await fetch(`http://localhost:3000/evento/participante?${pParams}`, {
+                     method: 'POST'
+                });
+            }
+        }
+
+        onSave(); // Refresh parent
+    } catch (error) {
+        console.error("Error saving event:", error);
+    }
+  };
 
   return (
     <div className="modal-backdrop">
@@ -113,8 +170,25 @@ export default function EventForm({ onClose, onSave }) {
           <h2>Nuevo Evento</h2>
           
           <div className="form-group">
-            <label>Título</label>
-            <input type="text" className="input-field" placeholder="Ej. Conferencia 2026" />
+            <label>Título del Evento</label>
+            <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Ej. Conferencia 2026"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="form-group" style={{ marginTop: '1rem' }}>
+            <label>Costo del Evento</label>
+            <input 
+                type="number" 
+                className="input-field" 
+                placeholder="0.00"
+                value={cost}
+                onChange={e => setCost(e.target.value)}
+            />
           </div>
 
           <div className="drag-section">
@@ -126,7 +200,7 @@ export default function EventForm({ onClose, onSave }) {
             >
               <div className="list-container">
                 <h3><Users size={16} /> Disponibles</h3>
-                <div className="droppable-area" id="available-list-droppable">
+                <Droppable id="available-list-droppable" className="droppable-area">
                   <SortableContext 
                     items={availableParticipants}
                     strategy={verticalListSortingStrategy}
@@ -135,21 +209,20 @@ export default function EventForm({ onClose, onSave }) {
                       <SortableParticipant key={p.id} id={p.id} name={p.name} />
                     ))}
                   </SortableContext>
-                </div>
+                </Droppable>
               </div>
 
               <div className="list-separator"><Plus /></div>
 
               <div className="list-container highlight">
                 <h3>Participantes del Evento</h3>
-                <div className="droppable-area" id="event-list-droppable">
+                <Droppable id="event-list-droppable" className="droppable-area">
                   <SortableContext 
                     items={eventParticipants}
                     strategy={verticalListSortingStrategy}
                   >
                     {eventParticipants.map(p => (
                       <SortableParticipant key={p.id} id={p.id} name={p.name} onRemove={(id) => {
-                         // Manual remove logic to move back to available
                          const item = eventParticipants.find(x => x.id === id);
                          setEventParticipants(prev => prev.filter(x => x.id !== id));
                          setAvailableParticipants(prev => [...prev, item]);
@@ -159,14 +232,13 @@ export default function EventForm({ onClose, onSave }) {
                         <div className="empty-placeholder">Arrastra participantes aquí</div>
                     )}
                   </SortableContext>
-                </div>
+                </Droppable>
               </div>
               
               <DragOverlay>
                 {activeId ? (
                    <div className="participant-item glass-panel dragging">
                       <GripVertical size={16} />
-                      {/* Find name helper */}
                       {[...availableParticipants, ...eventParticipants].find(p => p.id === activeId)?.name}
                    </div>
                 ) : null}
@@ -177,7 +249,7 @@ export default function EventForm({ onClose, onSave }) {
 
           <div className="modal-actions">
             <button className="btn" onClick={onClose}>Cancelar</button>
-            <button className="btn btn-primary" onClick={onSave}>Guardar Evento</button>
+            <button className="btn btn-primary" onClick={handleSaveInternal}>Guardar Evento</button>
           </div>
        </div>
     </div>
