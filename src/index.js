@@ -2,8 +2,10 @@
 const express = require("express");
 const app = express();
 const { sequelize } = require("../models");
+const cors = require('cors'); // Import cors
 
 // Middlewears
+app.use(cors()); // Use cors
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
