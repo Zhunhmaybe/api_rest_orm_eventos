@@ -2,9 +2,9 @@ const pgPromise = require('pg-promise')
 const config = {
     host: "localhost",
     port: 5432,
-    database: "eventos",
+    database: "Eventos",
     user: "postgres",
-    password: "12345"
+    password: "123"
 }
 const pgp = pgPromise({})
 const db = pgp(config)
