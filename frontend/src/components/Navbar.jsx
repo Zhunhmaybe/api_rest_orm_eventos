@@ -15,14 +15,20 @@ const Navbar = () => {
           <span>Eventos<span className="text-accent">Premium</span></span>
         </Link>
         
-        <div className="nav-links">
-          <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
-             Inicio
-          </Link>
-          <Link to="/eventos" className={`nav-link ${isActive('/eventos') ? 'active' : ''}`}>
-             Eventos
-          </Link>
-        </div>
+          <div className="nav-links">
+            <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+               Inicio
+            </Link>
+            <Link to="/eventos" className={`nav-link ${isActive('/eventos') ? 'active' : ''}`}>
+               Eventos
+            </Link>
+            <Link to="/salas" className={`nav-link ${isActive('/salas') ? 'active' : ''}`}>
+               Salas
+            </Link>
+            <Link to="/participantes" className={`nav-link ${isActive('/participantes') ? 'active' : ''}`}>
+               Participantes
+            </Link>
+          </div>
 
 
       </div>

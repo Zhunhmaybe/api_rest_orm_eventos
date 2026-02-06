@@ -6,6 +6,7 @@ import EventForm from '../components/EventForm';
 export default function EventManagerPage() {
     const [events, setEvents] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingEvent, setEditingEvent] = useState(null);
 
     const fetchEvents = () => {
         fetch('http://localhost:3000/eventos')
@@ -19,9 +20,13 @@ export default function EventManagerPage() {
                 const formatted = data.map(e => ({
                     id: e.eve_id,
                     titulo: e.eve_nombre,
+                    // Store raw cost for editing form
+                    precio: e.eve_costo, 
                     descripcion: e.eve_costo ? `Costo: $${e.eve_costo}` : 'Sin costo especificado',
                     fecha: '2026', // Placeholder as DB doesn't have date
                     ubicacion: `Sala ${e.sal_id || 'Principal'}`,
+                    // Store raw sal_id to pre-select in form
+                    sal_id: e.sal_id, 
                     participantes: '?' // Count not available in simple list
                 }));
                 setEvents(formatted);
@@ -34,7 +39,26 @@ export default function EventManagerPage() {
     }, []);
 
     const handleCreateEvent = () => {
+        setEditingEvent(null);
         setIsModalOpen(true);
+    };
+
+    const handleEditEvent = (event) => {
+        setEditingEvent(event);
+        setIsModalOpen(true);
+    };
+
+    const handleDeleteEvent = async (id) => {
+        if (!confirm("¿Seguro que quieres eliminar este evento?")) return;
+
+        try {
+            await fetch(`http://localhost:3000/evento?eve_id=${id}`, {
+                method: 'DELETE'
+            });
+            fetchEvents();
+        } catch (error) {
+            console.error("Error deleting event:", error);
+        }
     };
 
     const handleSaveEvent = () => {
@@ -58,8 +82,8 @@ export default function EventManagerPage() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>{evento.titulo}</h3>
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button className="btn-icon" title="Editar"><Edit size={16} /></button>
-                                    <button className="btn-icon" title="Eliminar"><Trash size={16} /></button>
+                                    <button className="btn-icon" title="Editar" onClick={() => handleEditEvent(evento)}><Edit size={16} /></button>
+                                    <button className="btn-icon" title="Eliminar" onClick={() => handleDeleteEvent(evento.id)}><Trash size={16} /></button>
                                 </div>
                             </div>
                             
@@ -96,6 +120,7 @@ export default function EventManagerPage() {
                 <EventForm 
                     onClose={() => setIsModalOpen(false)} 
                     onSave={handleSaveEvent}
+                    initialData={editingEvent}
                 />
             )}
         </div>

@@ -1,16 +1,22 @@
-const {Router} = require('express')
+const { Router } = require('express')
 const router = Router()
 
-const {createEvento, updateEvento, deleteEvento, getEventos, getEventosById,asignarParticipante,
-    deleteParticipante,
+const { createEvento, updateEvento, deleteEvento, getEventos, getEventosById, asignarParticipante,
     getSalasConEventos,
     getEventoConParticipantes,
     getSalasEventosDeParticipante,
 } = require('../controllers/evento-controller')
 
-router.get('/', (req, res)=>{res.send('Bienvenidos a mi API de BLOGS')})
-//
+const {
+    getSalas, createSala, updateSala, deleteSala
+} = require('../controllers/sala-controller')
 
+const {
+    getParticipantes, createParticipante, updateParticipante, deleteParticipante
+} = require('../controllers/participante-controller')
+
+router.get('/', (req, res) => { res.send('Bienvenidos a mi API de BLOGS') })
+//
 
 router.post('/evento', createEvento)
 router.put('/evento', updateEvento)
@@ -25,12 +31,19 @@ router.get('/salas-eventos', getSalasConEventos)
 router.get('/evento-participantes', getEventoConParticipantes)
 router.get('/participante-eventos', getSalasEventosDeParticipante)
 
+// Salas Routes
+router.get('/salas', getSalas)
+router.post('/sala', createSala)
+router.put('/sala', updateSala)
+router.delete('/sala', deleteSala)
 
-// router.get('/pizzas', getPizzas)
-
-// router.get('/pizzas/:id', getPizzasById)
+// Participantes Routes
+router.get('/participantes', getParticipantes)
+router.post('/participante', createParticipante)
+router.put('/participante', updateParticipante)
+router.delete('/participante', deleteParticipante)
 
 module.exports = router
-    
+
 
 
