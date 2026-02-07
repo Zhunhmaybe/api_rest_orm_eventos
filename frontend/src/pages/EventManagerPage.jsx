@@ -1,33 +1,28 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, Plus, Edit, Trash } from 'lucide-react';
+import { Calendar, MapPin, Users, Plus, Edit, Trash, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import EventForm from '../components/EventForm';
 
 export default function EventManagerPage() {
     const [events, setEvents] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingEvent, setEditingEvent] = useState(null);
+    const navigate = useNavigate();
 
     const fetchEvents = () => {
         fetch('http://localhost:3000/eventos')
             .then(res => res.json())
             .then(data => {
-                // Formatting API response to match UI needs
-                // API keys: eve_id, eve_nombre, eve_costo, sal_id
-                // We'll map them appropriately.
-                // Note: Missing date/description/location details in simple GET /eventos
-                // We will default them for now.
                 const formatted = data.map(e => ({
                     id: e.eve_id,
                     titulo: e.eve_nombre,
-                    // Store raw cost for editing form
-                    precio: e.eve_costo, 
+                    precio: e.eve_costo,
                     descripcion: e.eve_costo ? `Costo: $${e.eve_costo}` : 'Sin costo especificado',
-                    fecha: '2026', // Placeholder as DB doesn't have date
+                    fecha: '2026',
                     ubicacion: `Sala ${e.sal_id || 'Principal'}`,
-                    // Store raw sal_id to pre-select in form
-                    sal_id: e.sal_id, 
-                    participantes: '?' // Count not available in simple list
+                    sal_id: e.sal_id,
+                    participantes: '?'
                 }));
                 setEvents(formatted);
             })
@@ -63,62 +58,109 @@ export default function EventManagerPage() {
 
     const handleSaveEvent = () => {
         setIsModalOpen(false);
-        fetchEvents(); // Refresh list
+        fetchEvents();
+    };
+
+    const handleManageParticipants = (eventId, eventName) => {
+        navigate(`/eventos/${eventId}/participantes`, { state: { eventName } });
     };
 
     return (
         <div className="container" style={{ paddingBottom: '4rem' }}>
             <div className="animate-fade-in">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h1>Gestión de Eventos</h1>
+                <div className="page-header">
+                    <div>
+                        <h1 className="page-title">Gestión de Eventos</h1>
+                        <p className="page-subtitle">Administra todos tus eventos en un solo lugar</p>
+                    </div>
                     <button className="btn btn-primary" onClick={handleCreateEvent}>
                         <Plus size={20} /> Nuevo Evento
                     </button>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
-                    {events.map(evento => (
-                         <div key={evento.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>{evento.titulo}</h3>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button className="btn-icon" title="Editar" onClick={() => handleEditEvent(evento)}><Edit size={16} /></button>
-                                    <button className="btn-icon" title="Eliminar" onClick={() => handleDeleteEvent(evento.id)}><Trash size={16} /></button>
-                                </div>
-                            </div>
-                            
-                            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', flex: 1 }}>
-                                {evento.descripcion}
-                            </p>
-                            
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Calendar size={16} className="text-accent" />
-                                    <span>{evento.fecha}</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <MapPin size={16} />
-                                    <span>{evento.ubicacion}</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Users size={16} />
-                                    <span>{evento.participantes} Participantes</span>
-                                </div>
-                            </div>
-                         </div>
-                    ))}
-                    
-                    {events.length === 0 && (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                            No hay eventos registrados.
-                        </div>
-                    )}
-                </div>
+                {events.length === 0 ? (
+                    <div className="empty-state">
+                        <Calendar size={64} style={{ opacity: 0.3 }} />
+                        <h3>No hay eventos registrados</h3>
+                        <p>Comienza creando tu primer evento</p>
+                        <button className="btn btn-primary" onClick={handleCreateEvent}>
+                            <Plus size={20} /> Crear Evento
+                        </button>
+                    </div>
+                ) : (
+                    <div className="table-container glass-panel">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Evento</th>
+                                    <th>Descripción</th>
+                                    <th>Fecha</th>
+                                    <th>Ubicación</th>
+                                    <th>Participantes</th>
+                                    <th className="actions-column">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {events.map(evento => (
+                                    <tr key={evento.id}>
+                                        <td className="id-cell">#{evento.id}</td>
+                                        <td className="title-cell">{evento.titulo}</td>
+                                        <td className="description-cell">{evento.descripcion}</td>
+                                        <td>
+                                            <div className="cell-with-icon">
+                                                <Calendar size={16} />
+                                                <span>{evento.fecha}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="cell-with-icon">
+                                                <MapPin size={16} />
+                                                <span>{evento.ubicacion}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="cell-with-icon">
+                                                <Users size={16} />
+                                                <span>{evento.participantes}</span>
+                                            </div>
+                                        </td>
+                                        <td className="actions-cell">
+                                            <div className="action-buttons">
+                                                <button
+                                                    className="btn-action btn-action-primary"
+                                                    title="Gestionar Participantes"
+                                                    onClick={() => handleManageParticipants(evento.id, evento.titulo)}
+                                                >
+                                                    <UserPlus size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-action btn-action-edit"
+                                                    title="Editar"
+                                                    onClick={() => handleEditEvent(evento)}
+                                                >
+                                                    <Edit size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-action btn-action-delete"
+                                                    title="Eliminar"
+                                                    onClick={() => handleDeleteEvent(evento.id)}
+                                                >
+                                                    <Trash size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
             {isModalOpen && (
-                <EventForm 
-                    onClose={() => setIsModalOpen(false)} 
+                <EventForm
+                    onClose={() => setIsModalOpen(false)}
                     onSave={handleSaveEvent}
                     initialData={editingEvent}
                 />

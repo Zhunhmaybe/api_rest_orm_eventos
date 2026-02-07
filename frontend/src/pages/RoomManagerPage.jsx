@@ -30,10 +30,10 @@ export default function RoomManagerPage() {
     };
 
     const handleEdit = (s) => {
-        setFormData({ 
-            sal_nombre: s.sal_nombre, 
-            sal_descripcion: s.sal_descripcion, 
-            sal_estado: s.sal_estado 
+        setFormData({
+            sal_nombre: s.sal_nombre,
+            sal_descripcion: s.sal_descripcion,
+            sal_estado: s.sal_estado
         });
         setEditingId(s.sal_id);
         setIsModalOpen(true);
@@ -41,7 +41,7 @@ export default function RoomManagerPage() {
 
     const handleDelete = async (id) => {
         if (!confirm('¿Estás seguro de eliminar esta sala?')) return;
-        
+
         try {
             const res = await fetch(`http://localhost:3000/sala?sal_id=${id}`, {
                 method: 'DELETE'
@@ -54,9 +54,9 @@ export default function RoomManagerPage() {
             }
 
             if (!res.ok) {
-                 const data = await res.json(); 
-                 alert(data.message || "Error al eliminar");
-                 return;
+                const data = await res.json();
+                alert(data.message || "Error al eliminar");
+                return;
             }
 
             fetchSalas();
@@ -68,10 +68,10 @@ export default function RoomManagerPage() {
 
     const handleSave = async () => {
         try {
-            const url = editingId 
-                ? 'http://localhost:3000/sala' 
+            const url = editingId
+                ? 'http://localhost:3000/sala'
                 : 'http://localhost:3000/sala';
-            
+
             const method = editingId ? 'PUT' : 'POST';
             const body = editingId ? { ...formData, sal_id: editingId } : formData;
 
@@ -91,73 +91,112 @@ export default function RoomManagerPage() {
     return (
         <div className="container" style={{ paddingBottom: '4rem' }}>
             <div className="animate-fade-in">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h1>Gestión de Salas</h1>
+                <div className="page-header">
+                    <div>
+                        <h1 className="page-title">Gestión de Salas</h1>
+                        <p className="page-subtitle">Administra todas las salas disponibles</p>
+                    </div>
                     <button className="btn btn-primary" onClick={handleCreate}>
                         <Plus size={20} /> Nueva Sala
                     </button>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
-                    {salas.map(s => (
-                         <div key={s.sal_id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>{s.sal_nombre}</h3>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button className="btn-icon" onClick={() => handleEdit(s)} title="Editar"><Edit size={16} /></button>
-                                    <button className="btn-icon" onClick={() => handleDelete(s.sal_id)} title="Eliminar"><Trash size={16} /></button>
-                                </div>
-                            </div>
-                            
-                            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', flex: 1 }}>
-                                {s.sal_descripcion}
-                            </p>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    {s.sal_estado ? <CheckCircle size={16} className="text-accent" /> : <XCircle size={16} color="red" />}
-                                    <span>{s.sal_estado ? 'Disponible' : 'No Disponible'}</span>
-                                </div>
-                            </div>
-                         </div>
-                    ))}
-
-                    {salas.length === 0 && (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                            No hay salas registradas.
-                        </div>
-                    )}
-                </div>
+                {salas.length === 0 ? (
+                    <div className="empty-state">
+                        <MapPin size={64} style={{ opacity: 0.3 }} />
+                        <h3>No hay salas registradas</h3>
+                        <p>Comienza agregando tu primera sala</p>
+                        <button className="btn btn-primary" onClick={handleCreate}>
+                            <Plus size={20} /> Crear Sala
+                        </button>
+                    </div>
+                ) : (
+                    <div className="table-container glass-panel">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th className="actions-column">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {salas.map(s => (
+                                    <tr key={s.sal_id}>
+                                        <td className="id-cell">#{s.sal_id}</td>
+                                        <td className="title-cell">{s.sal_nombre}</td>
+                                        <td className="description-cell">{s.sal_descripcion}</td>
+                                        <td>
+                                            <div className="cell-with-icon">
+                                                {s.sal_estado ? (
+                                                    <>
+                                                        <CheckCircle size={16} style={{ color: 'var(--color-success)' }} />
+                                                        <span style={{ color: 'var(--color-success)' }}>Disponible</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <XCircle size={16} style={{ color: 'var(--color-danger)' }} />
+                                                        <span style={{ color: 'var(--color-danger)' }}>No Disponible</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="actions-cell">
+                                            <div className="action-buttons">
+                                                <button
+                                                    className="btn-action btn-action-edit"
+                                                    onClick={() => handleEdit(s)}
+                                                    title="Editar"
+                                                >
+                                                    <Edit size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-action btn-action-delete"
+                                                    onClick={() => handleDelete(s.sal_id)}
+                                                    title="Eliminar"
+                                                >
+                                                    <Trash size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
             {isModalOpen && (
                 <div className="modal-backdrop">
                     <div className="modal-content glass-panel animate-fade-in">
                         <h2>{editingId ? 'Editar Sala' : 'Nueva Sala'}</h2>
-                        
+
                         <div className="form-group">
                             <label>Nombre de la Sala</label>
-                            <input 
-                                type="text" 
-                                className="input-field" 
+                            <input
+                                type="text"
+                                className="input-field"
                                 value={formData.sal_nombre}
-                                onChange={e => setFormData({...formData, sal_nombre: e.target.value})}
+                                onChange={e => setFormData({ ...formData, sal_nombre: e.target.value })}
                             />
                         </div>
                         <div className="form-group" style={{ marginTop: '1rem' }}>
                             <label>Descripción</label>
-                            <textarea 
-                                className="input-field" 
+                            <textarea
+                                className="input-field"
                                 value={formData.sal_descripcion}
-                                onChange={e => setFormData({...formData, sal_descripcion: e.target.value})}
+                                onChange={e => setFormData({ ...formData, sal_descripcion: e.target.value })}
                             />
                         </div>
                         <div className="form-group" style={{ marginTop: '1rem' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <input 
+                                <input
                                     type="checkbox"
                                     checked={formData.sal_estado}
-                                    onChange={e => setFormData({...formData, sal_estado: e.target.checked})}
+                                    onChange={e => setFormData({ ...formData, sal_estado: e.target.checked })}
                                 />
                                 Sala Disponible
                             </label>
