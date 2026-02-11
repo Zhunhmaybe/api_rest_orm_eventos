@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 
 // Setup query
-const sequelize = new Sequelize("Eventos", "postgres", "123", {
+const sequelize = new Sequelize("Eventos", "postgres", "12345", {
     host: "localhost",
     dialect: "postgres",
     logging: console.log, // Enable logging to see actual SQL

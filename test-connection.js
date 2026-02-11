@@ -23,18 +23,17 @@ const testConnection = async (dbName, user, password) => {
 
 const runTests = async () => {
   console.log("Testing database connections...\n");
-  
+
   // Test 1: Current config
-  await testConnection("Eventos", "postgres", "123");
-  
+  await testConnection("eventos", "postgres", "12345");
+
   // Test 2: Try with common default passwords
-  await testConnection("postgres", "postgres", "postgres");
-  await testConnection("postgres", "postgres", "123");
-  await testConnection("postgres", "postgres", "");
-  
+  await testConnection("eventos", "postgres", "postgres");
+  await testConnection("eventos", "postgres", "12345");
+  await testConnection("eventos", "postgres", "");
+
   // Test 3: Try with the database name from .env
-  await testConnection("api-rest-eventos", "postgres", "123");
-  await testConnection("api-rest-eventos", "user", "1234");
+  await testConnection("eventos", "postgres", "12345"); // From .env
 };
 
 runTests();

@@ -1,10 +1,10 @@
 const pgPromise = require('pg-promise')
 const config = {
-    host: "localhost",
+    host: "aws-1-us-east-1.pooler.supabase.com",
     port: 5432,
-    database: "api-rest-eventos",
-    user: "postgres",
-    password: "1234"
+    database: "postgres",
+    user: "postgres.epmbqjxuewvhgdmmpxtq",
+    password: "c7LHBltsNbKsm0A5"
 }
 const pgp = pgPromise({})
 const db = pgp(config)
