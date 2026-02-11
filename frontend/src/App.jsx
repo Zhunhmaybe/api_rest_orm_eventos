@@ -1,15 +1,23 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import EventManagerPage from './pages/EventManagerPage';
 import EventParticipantsPage from './pages/EventParticipantsPage';
-import './App.css';
-
 import ParticipantManagerPage from './pages/ParticipantManagerPage';
 import RoomManagerPage from './pages/RoomManagerPage';
+import LoginPage from './pages/LoginPage';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import './App.css';
 
-function App() {
+function AppContent() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
   return (
     <Layout>
       <Routes>
@@ -20,6 +28,14 @@ function App() {
         <Route path="/participantes" element={<ParticipantManagerPage />} />
       </Routes>
     </Layout>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

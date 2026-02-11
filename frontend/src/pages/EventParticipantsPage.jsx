@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { ArrowLeft, UserPlus, Users, Trash, Home } from 'lucide-react';
+import { ArrowLeft, UserPlus, Users, Trash, Home, ArrowRight } from 'lucide-react';
 
 export default function EventParticipantsPage() {
     const { eventId } = useParams();
@@ -12,6 +12,8 @@ export default function EventParticipantsPage() {
     const [allParticipants, setAllParticipants] = useState([]);
     const [availableParticipants, setAvailableParticipants] = useState([]);
     const [draggedParticipant, setDraggedParticipant] = useState(null);
+    const [isDragOverDrop, setIsDragOverDrop] = useState(false);
+    const dropZoneRef = useRef(null);
 
     useEffect(() => {
         fetchEventParticipants();
@@ -40,7 +42,6 @@ export default function EventParticipantsPage() {
     };
 
     useEffect(() => {
-        // Filter out participants already in the event
         const eventParticipantIds = eventParticipants.map(p => p.par_id);
         const available = allParticipants.filter(p => !eventParticipantIds.includes(p.par_id));
         setAvailableParticipants(available);
@@ -75,16 +76,46 @@ export default function EventParticipantsPage() {
         }
     };
 
-    const handleDragStart = (participant) => {
+    // --- Drag handlers ---
+    const handleDragStart = (e, participant) => {
         setDraggedParticipant(participant);
+        // Set a custom drag image
+        const el = e.currentTarget;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', participant.par_id);
+
+        // Style the dragging element
+        requestAnimationFrame(() => {
+            el.classList.add('is-dragging');
+        });
+    };
+
+    const handleDragEnd = (e) => {
+        e.currentTarget.classList.remove('is-dragging');
+        setDraggedParticipant(null);
+        setIsDragOverDrop(false);
     };
 
     const handleDragOver = (e) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        setIsDragOverDrop(true);
+    };
+
+    const handleDragLeave = (e) => {
+        // Only deactivate if leaving the drop zone entirely
+        if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget)) {
+            setIsDragOverDrop(false);
+        }
     };
 
     const handleDrop = (e) => {
         e.preventDefault();
+        setIsDragOverDrop(false);
         if (draggedParticipant) {
             handleAddParticipant(draggedParticipant.par_id);
             setDraggedParticipant(null);
@@ -115,7 +146,7 @@ export default function EventParticipantsPage() {
                             <Users size={32} style={{ marginRight: '0.5rem' }} />
                             Participantes de: {eventName}
                         </h1>
-                        <p className="page-subtitle">Gestiona los participantes de este evento</p>
+                        <p className="page-subtitle">Gestiona los participantes de este evento — arrastra o haz clic para agregar</p>
                     </div>
                     <button className="btn btn-secondary" onClick={() => navigate('/eventos')}>
                         <ArrowLeft size={20} /> Volver a Eventos
@@ -130,7 +161,7 @@ export default function EventParticipantsPage() {
                             <UserPlus size={20} />
                             Participantes Disponibles ({availableParticipants.length})
                         </h3>
-                        <p className="panel-subtitle">Arrastra participantes a la derecha para agregarlos al evento</p>
+                        <p className="panel-subtitle">Arrastra o haz clic en el botón para agregar al evento</p>
 
                         <div className="participants-list">
                             {availableParticipants.length === 0 ? (
@@ -141,9 +172,10 @@ export default function EventParticipantsPage() {
                                 availableParticipants.map(participant => (
                                     <div
                                         key={participant.par_id}
-                                        className="participant-item"
+                                        className={`participant-item ${draggedParticipant?.par_id === participant.par_id ? 'is-dragging' : ''}`}
                                         draggable
-                                        onDragStart={() => handleDragStart(participant)}
+                                        onDragStart={(e) => handleDragStart(e, participant)}
+                                        onDragEnd={handleDragEnd}
                                     >
                                         <div className="participant-avatar">
                                             {participant.par_nombre.charAt(0).toUpperCase()}
@@ -157,7 +189,7 @@ export default function EventParticipantsPage() {
                                             onClick={() => handleAddParticipant(participant.par_id)}
                                             title="Agregar al evento"
                                         >
-                                            <UserPlus size={16} />
+                                            <ArrowRight size={16} />
                                         </button>
                                     </div>
                                 ))
@@ -167,8 +199,11 @@ export default function EventParticipantsPage() {
 
                     {/* Event Participants */}
                     <div
-                        className="glass-panel participants-panel drop-zone"
+                        ref={dropZoneRef}
+                        className={`glass-panel participants-panel drop-zone ${isDragOverDrop ? 'drop-zone-active' : ''}`}
                         onDragOver={handleDragOver}
+                        onDragEnter={handleDragEnter}
+                        onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                     >
                         <h3 className="panel-title">
@@ -179,9 +214,9 @@ export default function EventParticipantsPage() {
 
                         <div className="participants-list">
                             {eventParticipants.length === 0 ? (
-                                <div className="empty-placeholder">
+                                <div className={`empty-placeholder ${isDragOverDrop ? 'empty-placeholder-active' : ''}`}>
                                     No hay participantes en este evento.<br />
-                                    Arrastra participantes aquí para agregarlos.
+                                    Arrastra participantes aquí o usa el botón.
                                 </div>
                             ) : (
                                 eventParticipants.map(participant => (

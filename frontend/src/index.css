@@ -228,7 +228,7 @@ body {
 .id-cell {
   color: var(--color-text-secondary);
   font-weight: 600;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .title-cell {
@@ -426,7 +426,11 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-hover) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -464,7 +468,7 @@ body {
 }
 
 .drop-zone::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border: 2px dashed transparent;
@@ -589,6 +593,199 @@ body {
   margin-top: 1rem;
 }
 
+/* Transfer Items (EventForm click-to-add) */
+.transfer-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-surface-border);
+  border-radius: 0.65rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: 0.5rem;
+  user-select: none;
+}
+
+.transfer-item:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--color-accent);
+  transform: translateX(4px);
+}
+
+.transfer-item:active {
+  transform: translateX(6px) scale(0.98);
+}
+
+.transfer-item-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-hover) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.transfer-item-name {
+  flex: 1;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.transfer-item-arrow {
+  color: var(--color-text-secondary);
+  opacity: 0;
+  transition: all var(--transition-fast);
+  transform: translateX(-4px);
+}
+
+.transfer-item:hover .transfer-item-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--color-accent);
+}
+
+/* Available list scroll area */
+.available-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 250px;
+  padding-right: 0.25rem;
+}
+
+/* Search box */
+.search-box {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2rem;
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+  font-size: 0.8rem;
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* List counter */
+.list-counter {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* Pagination */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.pagination-text {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+/* Bulk transfer buttons */
+.btn-transfer-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px dashed rgba(99, 102, 241, 0.3);
+  border-radius: 0.5rem;
+  background: rgba(99, 102, 241, 0.05);
+  color: var(--color-accent);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.btn-transfer-all:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--color-accent);
+}
+
+.btn-transfer-all-remove {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.05);
+  color: var(--color-danger);
+}
+
+.btn-transfer-all-remove:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--color-danger);
+}
+
+/* Drag-and-drop visual states (EventParticipantsPage) */
+.is-dragging {
+  opacity: 0.4 !important;
+  transform: scale(0.95) !important;
+}
+
+.drop-zone-active {
+  border-color: var(--color-accent) !important;
+  background: rgba(99, 102, 241, 0.08) !important;
+  box-shadow:
+    0 0 30px rgba(99, 102, 241, 0.15),
+    inset 0 0 30px rgba(99, 102, 241, 0.05) !important;
+}
+
+.drop-zone-active::after {
+  border-color: var(--color-accent) !important;
+  background: rgba(99, 102, 241, 0.05) !important;
+}
+
+.empty-placeholder-active {
+  border-color: var(--color-accent) !important;
+  color: var(--color-accent) !important;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+/* SortableParticipant in event list */
+.participant-item.glass-panel {
+  margin-bottom: 0.5rem;
+  padding: 0.65rem 0.85rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .participants-manager {
@@ -602,5 +799,9 @@ body {
 
   .table-container {
     overflow-x: scroll;
+  }
+
+  .drag-section {
+    flex-direction: column;
   }
 }

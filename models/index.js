@@ -5,6 +5,7 @@ const Participante = require("./Participante");
 const EventoParticipante = require("./EventoParticipante");
 const Publicacion = require("./Publicacion");
 const Comentario = require("./Comentario");
+const Usuario = require("./Usuario");
 
 // Associations
 Sala.hasMany(Evento, { foreignKey: "sal_id" });
@@ -32,4 +33,5 @@ module.exports = {
   EventoParticipante,
   Publicacion,
   Comentario,
+  Usuario,
 };

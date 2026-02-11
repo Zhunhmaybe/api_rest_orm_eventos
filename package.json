@@ -8,7 +8,9 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon ./src/index.js",
-    "dev": "cd frontend && npm run dev",
+    "server": "nodemon ./src/index.js",
+    "client": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -32,6 +34,7 @@
   },
   "homepage": "https://github.com/Zhunhmaybe/api_rest_orm_eventos#readme",
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "prisma": "^7.3.0"
   }
 }
