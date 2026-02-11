@@ -1,7 +1,7 @@
 {
-  "name": "api-rest-blogs",
+  "name": "api-rest-orm-eventos",
   "version": "1.0.0",
-  "description": "API-REST de Blogs",
+  "description": "API-REST de Eventos",
   "license": "ISC",
   "author": "Grupo 4",
   "type": "commonjs",

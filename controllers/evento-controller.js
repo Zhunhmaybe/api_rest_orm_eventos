@@ -212,12 +212,10 @@ const getSalasConEventos = async (req, res) => {
 
     res.status(200).json(flatResponse);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error en consulta salas-eventos",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error en consulta salas-eventos",
+      error: error.message,
+    });
   }
 };
 
@@ -257,12 +255,10 @@ const getEventoConParticipantes = async (req, res) => {
     res.status(200).json(flatResponse);
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message: "Error en consulta evento-participantes",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error en consulta evento-participantes",
+      error: error.message,
+    });
   }
 };
 
@@ -320,12 +316,27 @@ const getSalasEventosDeParticipante = async (req, res) => {
     res.status(200).json(flatResponse);
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message: "Error en consulta participante-salas-eventos",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error en consulta participante-salas-eventos",
+      error: error.message,
+    });
+  }
+};
+
+const getParticipantes = async (req, res) => {
+  try {
+    const response = await Participante.findAll({
+      attributes: [
+        "par_id",
+        "par_nombre",
+        "par_cedula",
+        "par_telefono",
+        "par_correo",
+      ],
+    });
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -340,4 +351,5 @@ module.exports = {
   getSalasConEventos,
   getEventoConParticipantes,
   getSalasEventosDeParticipante,
+  getParticipantes,
 };

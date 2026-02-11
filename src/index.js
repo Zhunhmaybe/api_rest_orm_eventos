@@ -12,6 +12,9 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use(require("../routes/index"));
 
+const cors = require("cors");
+app.use(cors());
+
 // Service Execution
 const startServer = async () => {
   try {
