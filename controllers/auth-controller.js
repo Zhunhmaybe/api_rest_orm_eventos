@@ -4,7 +4,6 @@ const login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Simple verification (plaintext as requested)
     const user = await Usuario.findOne({ where: { usu_nombre: username } });
 
     if (!user || user.usu_password !== password) {
@@ -21,7 +20,7 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Error en inicio de sesión:", error);
     res.status(500).json({ message: "Error en el servidor" });
   }
 };

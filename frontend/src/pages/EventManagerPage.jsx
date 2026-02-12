@@ -22,7 +22,7 @@ export default function EventManagerPage() {
                     fecha: '2026',
                     ubicacion: `Sala ${e.sal_id || 'Principal'}`,
                     sal_id: e.sal_id,
-                    participantes: '?'
+                    participantes: e.cantidad_participantes || 0
                 }));
                 setEvents(formatted);
             })

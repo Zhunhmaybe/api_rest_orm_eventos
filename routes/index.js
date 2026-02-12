@@ -8,6 +8,7 @@ const {
   getEventos,
   getEventosById,
   asignarParticipante,
+  deleteParticipante: deleteParticipanteDeEvento,
   getSalasConEventos,
   getEventoConParticipantes,
   getSalasEventosDeParticipante,
@@ -30,9 +31,8 @@ const {
 const { login, register } = require("../controllers/auth-controller");
 
 router.get("/", (req, res) => {
-  res.send("Bienvenidos a mi API de BLOGS");
+  res.send("Bienvenidos a mi API de Eventos");
 });
-//
 
 router.post("/evento", createEvento);
 router.put("/evento", updateEvento);
@@ -41,7 +41,7 @@ router.get("/eventos", getEventos);
 router.get("/evento/:id", getEventosById);
 
 router.post("/evento/participante", asignarParticipante);
-router.delete("/evento/participante", deleteParticipante);
+router.delete("/evento/participante", deleteParticipanteDeEvento);
 
 router.get("/salas-eventos", getSalasConEventos);
 router.get("/evento-participantes", getEventoConParticipantes);

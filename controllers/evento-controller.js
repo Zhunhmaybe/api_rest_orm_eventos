@@ -72,6 +72,11 @@ const deleteEvento = async (req, res) => {
       });
     }
 
+    // Eliminar relaciones primero para evitar conflictos de llave foránea
+    await EventoParticipante.destroy({
+      where: { eve_id },
+    });
+
     await Evento.destroy({
       where: { eve_id },
     });
@@ -83,6 +88,7 @@ const deleteEvento = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error);
     res.json({
       message: "¡Error al eliminar Evento!",
       body: {
@@ -95,10 +101,28 @@ const deleteEvento = async (req, res) => {
 const getEventos = async (req, res) => {
   try {
     const response = await Evento.findAll({
-      attributes: ["eve_id", "sal_id", "eve_nombre", "eve_costo"],
+      attributes: [
+        "eve_id",
+        "sal_id",
+        "eve_nombre",
+        "eve_costo",
+        [
+          sequelize.fn("COUNT", sequelize.col("Participantes.par_id")),
+          "cantidad_participantes",
+        ],
+      ],
+      include: [
+        {
+          model: Participante,
+          attributes: [],
+          through: { attributes: [] },
+        },
+      ],
+      group: ["Evento.eve_id"],
     });
     res.json(response);
   } catch (error) {
+    console.error(error);
     res.json({ error });
   }
 };
@@ -162,10 +186,8 @@ const deleteParticipante = async (req, res) => {
 
 const getSalasConEventos = async (req, res) => {
   try {
-    // SELECT s.sal_id, s.sal_nombre, e.eve_nombre, e.eve_costo FROM sala s LEFT JOIN evento e ...
-    // Sequelize returns nested objects by default, to get flat structure we might need raw: true or manual mapping
-    // But let's try to stick to standard Sequelize output which is usually better (nested).
-    // However, if strict flat format is required matching the original SQL output, we might need attributes.
+    // Sequelize devuelve objetos anidados por defecto.
+    // Se busca mantener la estructura plana original si es necesario, pero JSON jerárquico es comúnmente preferido.
 
     const response = await Sala.findAll({
       attributes: ["sal_id", "sal_nombre"],
@@ -182,12 +204,7 @@ const getSalasConEventos = async (req, res) => {
       ],
     });
 
-    // Formatting to match original flat structure if possible,
-    // or just return the hierarchical JSON which is more API friendly.
-    // The original SQL returned a flat list. Sequelize returns Sales with an array of Eventos.
-    // I will return the Sequelize structure as it's "transformar ... mediante orms" implying leveraging ORM features.
-    // But if exact format is critical, I can map it.
-    // Let's flatten it to be safe and close to original behavior.
+    // Aplanando la respuesta para coincidir con el comportamiento original.
 
     const flatResponse = [];
     response.forEach((sala) => {
@@ -233,7 +250,7 @@ const getEventoConParticipantes = async (req, res) => {
       include: [
         {
           model: Participante,
-          attributes: ["par_cedula", "par_nombre", "par_id"], // added par_id for ordering
+          attributes: ["par_cedula", "par_nombre", "par_id"],
           through: {
             attributes: ["evepar_cantidad"],
           },
@@ -244,7 +261,6 @@ const getEventoConParticipantes = async (req, res) => {
 
     if (!response) return res.json([]);
 
-    // Flattening
     const flatResponse = response.Participantes.map((p) => ({
       eve_nombre: response.eve_nombre,
       par_cedula: p.par_cedula,
@@ -270,9 +286,8 @@ const getSalasEventosDeParticipante = async (req, res) => {
   }
 
   try {
-    // This is a 3-way join: Participante -> Evento -> Sala
-    // In Sequelize with Associations properly set:
-    // User wants: sal_nombre, eve_nombre, eve_costo, par_nombre, evepar_cantidad
+    // Consulta de tres vías: Participante -> Evento -> Sala
+    // El usuario requiere: sal_nombre, eve_nombre, eve_costo, par_nombre, evepar_cantidad
 
     const response = await Participante.findOne({
       where: { par_id },
@@ -280,14 +295,14 @@ const getSalasEventosDeParticipante = async (req, res) => {
       include: [
         {
           model: Evento,
-          attributes: ["eve_nombre", "eve_costo", "eve_id"], // eve_id for ordering
+          attributes: ["eve_nombre", "eve_costo", "eve_id"],
           through: {
             attributes: ["evepar_cantidad"],
           },
           include: [
             {
               model: Sala,
-              attributes: ["sal_nombre", "sal_id"], // sal_id for ordering
+              attributes: ["sal_nombre", "sal_id"],
             },
           ],
         },
@@ -302,7 +317,7 @@ const getSalasEventosDeParticipante = async (req, res) => {
 
     const flatResponse = [];
     response.Eventos.forEach((evento) => {
-      // Evento belongsTo Sala, so evento.Sala should be an object
+      // Evento pertenece a Sala
       const sala = evento.Sala;
       flatResponse.push({
         sal_nombre: sala ? sala.sal_nombre : null,

@@ -31,7 +31,7 @@ export function SortableParticipant({ id, name, onRemove }) {
       {onRemove && (
         <button 
           onClick={(e) => {
-            e.stopPropagation(); // Prevent drag start when clicking remove
+            e.stopPropagation(); 
             onRemove(id);
           }}
           className="btn-icon"
