@@ -4,7 +4,7 @@ const config = {
     port: 5432,
     database: "api-rest-eventos",
     user: "postgres",
-    password: "1234"
+    password: "123"
 }
 const pgp = pgPromise({})
 const db = pgp(config)

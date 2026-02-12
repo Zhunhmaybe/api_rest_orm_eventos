@@ -1,6 +1,6 @@
 const { Sequelize } = require("sequelize");
 
-const sequelize = new Sequelize("api-rest-eventos", "postgres", "1234", {
+const sequelize = new Sequelize("Eventos", "postgres", "123", {
   host: "localhost",
   dialect: "postgres",
   logging: false,
