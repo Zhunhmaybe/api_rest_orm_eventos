@@ -95,10 +95,30 @@ const deleteEvento = async (req, res) => {
 const getEventos = async (req, res) => {
   try {
     const response = await Evento.findAll({
-      attributes: ["eve_id", "sal_id", "eve_nombre", "eve_costo"],
+      attributes: [
+        "eve_id",
+        "sal_id",
+        "eve_nombre",
+        "eve_costo",
+        [
+          sequelize.fn("COUNT", sequelize.col("Participantes.par_id")),
+          "participantes_count",
+        ],
+      ],
+      include: [
+        {
+          model: Participante,
+          attributes: [],
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+      group: ["Evento.eve_id", "Evento.sal_id", "Evento.eve_nombre", "Evento.eve_costo"],
     });
     res.json(response);
   } catch (error) {
+    console.log(error);
     res.json({ error });
   }
 };
