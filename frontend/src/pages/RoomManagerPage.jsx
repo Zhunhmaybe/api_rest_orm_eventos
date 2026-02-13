@@ -13,7 +13,10 @@ export default function RoomManagerPage() {
     const [editingId, setEditingId] = useState(null);
 
     const fetchSalas = () => {
-        fetch('http://localhost:3000/salas')
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:3000/api/salas', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => setSalas(data))
             .catch(err => console.error(err));
@@ -43,8 +46,10 @@ export default function RoomManagerPage() {
         if (!confirm('¿Estás seguro de eliminar esta sala?')) return;
 
         try {
-            const res = await fetch(`http://localhost:3000/sala?sal_id=${id}`, {
-                method: 'DELETE'
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:3000/api/sala?sal_id=${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (res.status === 409) {
@@ -68,16 +73,20 @@ export default function RoomManagerPage() {
 
     const handleSave = async () => {
         try {
+            const token = localStorage.getItem('token');
             const url = editingId
-                ? 'http://localhost:3000/sala'
-                : 'http://localhost:3000/sala';
+                ? 'http://localhost:3000/api/sala'
+                : 'http://localhost:3000/api/sala';
 
             const method = editingId ? 'PUT' : 'POST';
             const body = editingId ? { ...formData, sal_id: editingId } : formData;
 
             await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(body)
             });
 

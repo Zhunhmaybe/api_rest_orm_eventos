@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use(require("../routes/index"));
+app.use("/api", require("../routes/index"));
 
 // Service Execution
 const startServer = async () => {
@@ -34,6 +34,23 @@ const startServer = async () => {
       }
     } catch (e) {
       console.error("Error seeding admin:", e);
+    }
+
+    // Check/Create Test Participant
+    const { Participante } = require("../models");
+    try {
+      const participant = await Participante.findOne({ where: { par_correo: "juan@example.com" } });
+      if (!participant) {
+        await Participante.create({
+          par_nombre: "Juan Perez",
+          par_cedula: "1234567890",
+          par_correo: "juan@example.com",
+          par_password: "123", // Password simple para pruebas
+        });
+        console.log("Participante de prueba (juan@example.com / 123) creado");
+      }
+    } catch (e) {
+      console.error("Error seeding participant:", e);
     }
 
     app.listen(3000);

@@ -154,7 +154,7 @@ const asignarParticipante = async (req, res) => {
   }
 };
 
-const deleteParticipante = async (req, res) => {
+const deleteParticipanteDeEvento = async (req, res) => {
   const { eve_id, par_id } = req.query;
 
   try {
@@ -320,6 +320,8 @@ const getSalasEventosDeParticipante = async (req, res) => {
       // Evento pertenece a Sala
       const sala = evento.Sala;
       flatResponse.push({
+        eve_id: evento.eve_id,
+        sal_id: sala ? sala.sal_id : null,
         sal_nombre: sala ? sala.sal_nombre : null,
         eve_nombre: evento.eve_nombre,
         eve_costo: evento.eve_costo,
@@ -362,7 +364,7 @@ module.exports = {
   getEventos,
   getEventosById,
   asignarParticipante,
-  deleteParticipante,
+  deleteParticipanteDeEvento,
   getSalasConEventos,
   getEventoConParticipantes,
   getSalasEventosDeParticipante,

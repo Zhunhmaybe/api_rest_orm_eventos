@@ -13,7 +13,10 @@ export default function ParticipantManagerPage() {
     const [editingId, setEditingId] = useState(null);
 
     const fetchParticipants = () => {
-        fetch('http://localhost:3000/participantes')
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:3000/api/participantes', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => setParticipants(data))
             .catch(err => console.error(err));
@@ -43,8 +46,10 @@ export default function ParticipantManagerPage() {
         if (!confirm('¿Estás seguro de eliminar este participante?')) return;
 
         try {
-            const res = await fetch(`http://localhost:3000/participante?par_id=${id}`, {
-                method: 'DELETE'
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:3000/api/participante?par_id=${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (res.status === 409) {
@@ -68,16 +73,20 @@ export default function ParticipantManagerPage() {
 
     const handleSave = async () => {
         try {
+            const token = localStorage.getItem('token');
             const url = editingId
-                ? 'http://localhost:3000/participante'
-                : 'http://localhost:3000/participante';
+                ? 'http://localhost:3000/api/participante'
+                : 'http://localhost:3000/api/participante';
 
             const method = editingId ? 'PUT' : 'POST';
             const body = editingId ? { ...formData, par_id: editingId } : formData;
 
             await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(body)
             });
 

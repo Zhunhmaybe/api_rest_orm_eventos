@@ -10,12 +10,13 @@ const getParticipantes = async (req, res) => {
 };
 
 const createParticipante = async (req, res) => {
-  const { par_cedula, par_nombre, par_correo } = req.body;
+  const { par_cedula, par_nombre, par_correo, par_password } = req.body;
   try {
     const response = await Participante.create({
       par_cedula,
       par_nombre,
       par_correo,
+      par_password,
     });
     res.json(response);
   } catch (error) {

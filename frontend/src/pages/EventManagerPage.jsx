@@ -11,7 +11,7 @@ export default function EventManagerPage() {
     const navigate = useNavigate();
 
     const fetchEvents = () => {
-        fetch('http://localhost:3000/eventos')
+        fetch('http://localhost:3000/api/eventos')
             .then(res => res.json())
             .then(data => {
                 const formatted = data.map(e => ({
@@ -47,8 +47,10 @@ export default function EventManagerPage() {
         if (!confirm("¿Seguro que quieres eliminar este evento?")) return;
 
         try {
-            await fetch(`http://localhost:3000/evento?eve_id=${id}`, {
-                method: 'DELETE'
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:3000/api/evento?eve_id=${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             fetchEvents();
         } catch (error) {

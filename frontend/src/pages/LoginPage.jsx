@@ -1,22 +1,34 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Lock, User } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Lock, User, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('empleado');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.role) {
+      setRole(location.state.role);
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const result = await login(username, password);
+    const result = await login(username, password, role);
     if (result.success) {
-      navigate('/');
+      if (role === 'participante') {
+        navigate('/mis-eventos');
+      } else {
+        navigate('/');
+      }
     } else {
       setError(result.message);
     }
@@ -39,10 +51,29 @@ export default function LoginPage() {
         flexDirection: 'column',
         gap: '1.5rem'
       }}>
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', position: 'relative' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              background: 'none',
+              border: 'none',
+              color: 'var(--color-text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}
+          >
+            <ArrowLeft size={18} />
+          </button>
           <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem' }}>Bienvenido</h1>
           <p style={{ margin: 0, color: 'var(--color-text-secondary)' }}>Ingresa tus credenciales</p>
         </div>
+
+        
 
         {error && (
           <div style={{
@@ -60,7 +91,9 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Usuario</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>
+              {role === 'empleado' ? 'Usuario' : 'Correo o Cédula'}
+            </label>
             <div style={{ position: 'relative' }}>
               <User size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)' }} />
               <input
@@ -69,7 +102,7 @@ export default function LoginPage() {
                 style={{ paddingLeft: '2.5rem' }}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Ej. admin"
+                placeholder={role === 'empleado' ? "Ej. admin" : "juan@example.com"}
                 required
               />
             </div>
@@ -95,9 +128,9 @@ export default function LoginPage() {
             Iniciar Sesión
           </button>
         </form>
-        
+
         <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '1rem' }}>
-           Credenciales de prueba:<br/> <code>admin</code> / <code>admin</code>
+          Credenciales de prueba:<br /> <code>admin</code> / <code>admin</code>
         </div>
       </div>
     </div>

@@ -21,6 +21,10 @@ const Participante = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    par_password: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "participante",

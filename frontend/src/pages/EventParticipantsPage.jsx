@@ -76,15 +76,12 @@ export default function EventParticipantsPage() {
         }
     };
 
-    // --- Drag handlers ---
     const handleDragStart = (e, participant) => {
         setDraggedParticipant(participant);
-        // Set a custom drag image
         const el = e.currentTarget;
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', participant.par_id);
 
-        // Style the dragging element
         requestAnimationFrame(() => {
             el.classList.add('is-dragging');
         });
@@ -107,7 +104,6 @@ export default function EventParticipantsPage() {
     };
 
     const handleDragLeave = (e) => {
-        // Only deactivate if leaving the drop zone entirely
         if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget)) {
             setIsDragOverDrop(false);
         }

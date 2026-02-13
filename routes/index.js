@@ -1,6 +1,5 @@
-const { Router } = require("express");
-const router = Router();
-
+const express = require("express");
+const router = express.Router();
 const {
   createEvento,
   updateEvento,
@@ -8,7 +7,7 @@ const {
   getEventos,
   getEventosById,
   asignarParticipante,
-  deleteParticipante: deleteParticipanteDeEvento,
+  deleteParticipanteDeEvento,
   getSalasConEventos,
   getEventoConParticipantes,
   getSalasEventosDeParticipante,
@@ -29,35 +28,41 @@ const {
 } = require("../controllers/participante-controller");
 
 const { login, register } = require("../controllers/auth-controller");
+const { verifyToken, isEmpleado, isParticipante } = require("../middleware/auth");
 
 router.get("/", (req, res) => {
   res.send("Bienvenidos a mi API de Eventos");
 });
 
-router.post("/evento", createEvento);
-router.put("/evento", updateEvento);
-router.delete("/evento", deleteEvento);
+// Rutas Públicas
 router.get("/eventos", getEventos);
 router.get("/evento/:id", getEventosById);
+router.get("/user/eventos", getEventos); // Alias for consistency
 
-router.post("/evento/participante", asignarParticipante);
-router.delete("/evento/participante", deleteParticipanteDeEvento);
+// Rutas Empleados (Organizadores)
+router.post("/evento", [verifyToken, isEmpleado], createEvento);
+router.put("/evento", [verifyToken, isEmpleado], updateEvento);
+router.delete("/evento", [verifyToken, isEmpleado], deleteEvento);
 
-router.get("/salas-eventos", getSalasConEventos);
-router.get("/evento-participantes", getEventoConParticipantes);
-router.get("/participante-eventos", getSalasEventosDeParticipante);
+router.get("/salas-eventos", [verifyToken, isEmpleado], getSalasConEventos);
+router.get("/evento-participantes", [verifyToken, isEmpleado], getEventoConParticipantes);
 
-// Salas Routes
-router.get("/salas", getSalas);
-router.post("/sala", createSala);
-router.put("/sala", updateSala);
-router.delete("/sala", deleteSala);
+// Salas Routes (Empleados)
+router.get("/salas", [verifyToken, isEmpleado], getSalas);
+router.post("/sala", [verifyToken, isEmpleado], createSala);
+router.put("/sala", [verifyToken, isEmpleado], updateSala);
+router.delete("/sala", [verifyToken, isEmpleado], deleteSala);
 
-// Participantes Routes
-router.get("/participantes", getParticipantes);
-router.post("/participante", createParticipante);
-router.put("/participante", updateParticipante);
-router.delete("/participante", deleteParticipante);
+// Participantes Routes (Gestión por Empleados)
+router.get("/participantes", [verifyToken, isEmpleado], getParticipantes);
+router.post("/participante", [verifyToken, isEmpleado], createParticipante);
+router.put("/participante", [verifyToken, isEmpleado], updateParticipante);
+router.delete("/participante", [verifyToken, isEmpleado], deleteParticipante);
+
+// Rutas Participantes (Suscripción)
+router.post("/evento/participante", [verifyToken, isParticipante], asignarParticipante);
+router.delete("/evento/participante", [verifyToken, isParticipante], deleteParticipanteDeEvento);
+router.get("/participante-eventos", [verifyToken, isParticipante], getSalasEventosDeParticipante);
 
 // Auth
 router.post("/login", login);

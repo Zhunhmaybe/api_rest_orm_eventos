@@ -44,7 +44,10 @@ export default function EventForm({ onClose, onSave, initialData }) {
   }, [initialData]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/participantes')
+    const token = localStorage.getItem('token');
+    fetch('http://localhost:3000/api/participantes', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
       .then(res => res.json())
       .then(data => {
         const formatted = data.map(p => ({
@@ -56,7 +59,9 @@ export default function EventForm({ onClose, onSave, initialData }) {
       })
       .catch(err => console.error("Error fetching participants:", err));
 
-    fetch('http://localhost:3000/salas')
+    fetch('http://localhost:3000/api/salas', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
       .then(res => res.json())
       .then(data => {
         setSalas(data);
@@ -114,8 +119,9 @@ export default function EventForm({ onClose, onSave, initialData }) {
 
   const handleSaveInternal = async () => {
     try {
+      const token = localStorage.getItem('token');
       const isEditing = !!initialData;
-      const url = 'http://localhost:3000/evento';
+      const url = 'http://localhost:3000/api/evento';
       const method = isEditing ? 'PUT' : 'POST';
 
       const queryParams = new URLSearchParams({
@@ -128,7 +134,10 @@ export default function EventForm({ onClose, onSave, initialData }) {
         queryParams.append('eve_id', initialData.id);
       }
 
-      const res = await fetch(`${url}?${queryParams}`, { method });
+      const res = await fetch(`${url}?${queryParams}`, {
+        method,
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
       let newEventId;
       if (isEditing) {
@@ -146,8 +155,9 @@ export default function EventForm({ onClose, onSave, initialData }) {
             evepar_cantidad: 1
           });
           try {
-            await fetch(`http://localhost:3000/evento/participante?${pParams}`, {
-              method: 'POST'
+            await fetch(`http://localhost:3000/api/evento/participante?${pParams}`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` }
             });
           } catch (e) {
             console.log("Participant likely already assigned", e);
