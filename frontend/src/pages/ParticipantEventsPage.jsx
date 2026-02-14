@@ -42,7 +42,7 @@ export default function ParticipantEventsPage() {
     const handleSubscribe = async (eventId) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch('http://localhost:3000/api/evento/participante', {
+            const response = await fetch('http://localhost:3000/api/evento/participante', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,11 +53,17 @@ export default function ParticipantEventsPage() {
                     par_id: user.id
                 })
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error en la inscripción');
+            }
+
             fetchMyEvents();
             alert('¡Te has inscrito al evento exitosamente!');
         } catch (error) {
             console.error('Error subscribing:', error);
-            alert('Error al inscribirse');
+            alert('Error al inscribirse: ' + error.message);
         }
     };
 

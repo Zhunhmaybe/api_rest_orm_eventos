@@ -140,17 +140,29 @@ const getEventosById = async (req, res) => {
 };
 
 const asignarParticipante = async (req, res) => {
-  const { eve_id, par_id, evepar_cantidad } = req.query;
+  const { eve_id, par_id } = req.body;
+  let { evepar_cantidad } = req.body;
 
   try {
+    // Si no se envía la cantidad, tomamos el costo del evento por defecto
+    if (evepar_cantidad === undefined || evepar_cantidad === null) {
+      const evento = await Evento.findByPk(eve_id);
+      if (evento) {
+        evepar_cantidad = evento.eve_costo;
+      } else {
+        evepar_cantidad = 0;
+      }
+    }
+
     const response = await EventoParticipante.create({
       eve_id,
       par_id,
-      evepar_cantidad,
+      evepar_cantidad: evepar_cantidad || 0, // Fallback to 0 if still null
     });
     res.json(response);
   } catch (error) {
-    res.json(error);
+    console.error("Error al asignar participante:", error);
+    res.status(500).json(error);
   }
 };
 
@@ -161,10 +173,6 @@ const deleteParticipanteDeEvento = async (req, res) => {
     const deleted = await EventoParticipante.destroy({
       where: { eve_id, par_id },
     });
-
-    // Emulating returning * behavior might be tricky if row is gone,
-    // but we can return success message. The original code returned the deleted row
-    // but destroy() returns count.
 
     res.json({
       message: "Participante eliminado del evento con exito!!",
