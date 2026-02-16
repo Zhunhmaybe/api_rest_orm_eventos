@@ -66,6 +66,7 @@ router.get("/participante-eventos", [verifyToken, isParticipante], getSalasEvent
 
 // Auth
 router.post("/login", login);
+router.post("/register/participante", createParticipante);
 router.post("/register", register);
 
 module.exports = router;

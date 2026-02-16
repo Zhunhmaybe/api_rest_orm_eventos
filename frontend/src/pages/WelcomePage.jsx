@@ -1,12 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Calendar, Briefcase, ArrowRight } from 'lucide-react';
 
 export default function WelcomePage() {
     const navigate = useNavigate();
+    const [balloons, setBalloons] = useState([]);
+
+    useEffect(() => {
+        const initialBalloons = Array.from({ length: 8 }, (_, i) => ({
+            id: Date.now() + i,
+            left: Math.random() * 100,
+            delay: Math.random() * 5,
+            duration: 8 + Math.random() * 4,
+            color: ['#ff6b6b', '#d400ffff', '#45b7d1', '#f8f8f8ff', '#a855f7', '#65b241ff'][Math.floor(Math.random() * 6)]
+        }));
+        setBalloons(initialBalloons);
+
+        const interval = setInterval(() => {
+            const newBalloon = {
+                id: Date.now(),
+                left: Math.random() * 100,
+                delay: 0,
+                duration: 8 + Math.random() * 4,
+                color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ff0073ff', '#a855f7', '#38bdf8'][Math.floor(Math.random() * 6)]
+            };
+            setBalloons(prev => [...prev.slice(-7), newBalloon]);
+        }, 6000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleRoleSelect = (role) => {
         navigate('/login', { state: { role } });
+    };
+
+    const popBalloon = (id) => {
+        setBalloons(prev => prev.filter(balloon => balloon.id !== id));
     };
 
     return (
@@ -16,8 +45,56 @@ export default function WelcomePage() {
             flexDirection: 'column',
             background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
             color: '#fff',
-            fontFamily: 'Inter, sans-serif'
+            fontFamily: 'Inter, sans-serif',
+            position: 'relative',
+            overflow: 'hidden'
         }}>
+            {balloons.map((balloon) => (
+                <div
+                    key={balloon.id}
+                    onClick={() => popBalloon(balloon.id)}
+                    style={{
+                        position: 'absolute',
+                        left: `${balloon.left}%`,
+                        bottom: '-60px',
+                        width: '35px',
+                        height: '45px',
+                        cursor: 'pointer',
+                        animation: `float ${balloon.duration}s ease-in ${balloon.delay}s infinite`,
+                        zIndex: 1
+                    }}
+                >
+                    <div style={{
+                        width: '35px',
+                        height: '45px',
+                        background: balloon.color,
+                        borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                        position: 'relative',
+                        boxShadow: `inset -5px -5px 10px rgba(0,0,0,0.2), 0 0 15px ${balloon.color}50`,
+                        transition: 'transform 0.1s ease'
+                    }}>
+                        <div style={{
+                            position: 'absolute',
+                            top: '8px',
+                            left: '10px',
+                            width: '12px',
+                            height: '12px',
+                            background: 'rgba(255, 255, 255, 0.7)',
+                            borderRadius: '50%'
+                        }}></div>
+                    </div>
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '-15px',
+                        left: '50%',
+                        width: '1px',
+                        height: '15px',
+                        background: 'rgba(255, 255, 255, 0.3)',
+                        transform: 'translateX(-50%)'
+                    }}></div>
+                </div>
+            ))}
+
             <div style={{
                 flex: 1,
                 display: 'flex',
@@ -25,7 +102,9 @@ export default function WelcomePage() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '2rem',
-                textAlign: 'center'
+                textAlign: 'center',
+                position: 'relative',
+                zIndex: 2
             }}>
                 <div className="animate-fade-in">
                     <h1 style={{
@@ -55,14 +134,13 @@ export default function WelcomePage() {
                         flexWrap: 'wrap',
                         justifyContent: 'center'
                     }}>
-                        {/* Participant Card */}
                         <button
                             onClick={() => handleRoleSelect('participante')}
                             className="role-card"
                             style={{
-                                background: 'rgba(255, 255, 255, 0.05)',
+                                background: 'rgba(255, 255, 255, 0.2)',
                                 backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                border: '1px solid rgba(255, 255, 255, 0.98)',
                                 borderRadius: '1.5rem',
                                 padding: '2.5rem',
                                 width: '300px',
@@ -103,9 +181,9 @@ export default function WelcomePage() {
                             onClick={() => handleRoleSelect('empleado')}
                             className="role-card"
                             style={{
-                                background: 'rgba(255, 255, 255, 0.05)',
+                                background: 'rgba(255, 255, 255, 0.2)',
                                 backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                border: '1px solid rgba(255, 255, 255, 1)',
                                 borderRadius: '1.5rem',
                                 padding: '2.5rem',
                                 width: '300px',
@@ -149,18 +227,41 @@ export default function WelcomePage() {
                 padding: '2rem',
                 textAlign: 'center',
                 color: '#64748b',
-                fontSize: '0.875rem'
+                fontSize: '0.875rem',
+                position: 'relative',
+                zIndex: 2
             }}>
                 &copy; 2026 EventOS. Todos los derechos reservados.
             </footer>
 
             <style>{`
-        .role-card:hover {
-          transform: translateY(-5px);
-          background: rgba(255, 255, 255, 0.08) !important;
-          border-color: rgba(255, 255, 255, 0.2) !important;
-        }
-      `}</style>
+                .role-card:hover {
+                    transform: translateY(-5px);
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    border-color: rgba(255, 255, 255, 0.2) !important;
+                }
+
+                @keyframes float {
+                    0% {
+                        transform: translateY(0) translateX(0) rotate(0deg);
+                        opacity: 0;
+                    }
+                    10% {
+                        opacity: 1;
+                    }
+                    90% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(-100vh) translateX(20px) rotate(15deg);
+                        opacity: 0;
+                    }
+                }
+
+                div[style*="cursor: pointer"]:hover > div {
+                    transform: scale(1.1);
+                }
+            `}</style>
         </div>
     );
 }

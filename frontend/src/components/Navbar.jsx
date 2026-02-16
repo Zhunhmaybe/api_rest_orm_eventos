@@ -23,17 +23,17 @@ const Navbar = () => {
           <Calendar className="w-6 h-6 text-accent" />
           <span>Eventos<span className="text-accent">Premium</span></span>
         </Link>
-        
+
         <div className="nav-links">
           {user && user.role === 'empleado' && (
             <>
-              <Link to="/eventos" className={`nav - link ${ isActive('/eventos') ? 'active' : '' } `}>
+              <Link to="/eventos" className={`nav-link ${isActive('/eventos') ? 'active' : ''}`}>
                 Eventos
               </Link>
-              <Link to="/salas" className={`nav - link ${ isActive('/salas') ? 'active' : '' } `}>
+              <Link to="/salas" className={`nav-link ${isActive('/salas') ? 'active' : ''}`}>
                 Salas
               </Link>
-              <Link to="/participantes" className={`nav - link ${ isActive('/participantes') ? 'active' : '' } `}>
+              <Link to="/participantes" className={`nav-link ${isActive('/participantes') ? 'active' : ''}`}>
                 Participantes
               </Link>
             </>
@@ -41,17 +41,17 @@ const Navbar = () => {
 
           {user && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: '1rem' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                    {user.nombre} ({user.role})
-                </span>
-                <button 
-                    onClick={handleLogout}
-                    className="btn-icon"
-                    title="Cerrar Sesión"
-                    style={{ background: 'rgba(255,255,255,0.1)', padding: '0.5rem', borderRadius: '0.5rem' }}
-                >
-                    <LogOut size={18} />
-                </button>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                {user.nombre} ({user.role})
+              </span>
+              <button
+                onClick={handleLogout}
+                className="btn-icon"
+                title="Cerrar Sesión"
+                style={{ background: 'rgba(255,255,255,0.1)', padding: '0.5rem', borderRadius: '0.5rem' }}
+              >
+                <LogOut size={18} />
+              </button>
             </div>
           )}
         </div>

@@ -105,8 +105,17 @@ export default function ParticipantManagerPage() {
                         <h1 className="page-title">Gestión de Participantes</h1>
                         <p className="page-subtitle">Administra todos los participantes registrados</p>
                     </div>
+                </div>
+
+                <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem', color: '#fff' }}>Registrate con nosotros</h2>
+                        <p style={{ color: '#94a3b8', maxWidth: '500px' }}>
+                            Únete a nuestra plataforma para acceder a eventos exclusivos y gestionar tu participación de manera sencilla.
+                        </p>
+                    </div>
                     <button className="btn btn-primary" onClick={handleCreate}>
-                        <Plus size={20} /> Nuevo Participante
+                        <Plus size={20} /> Registrarse
                     </button>
                 </div>
 

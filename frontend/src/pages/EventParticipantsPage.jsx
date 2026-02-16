@@ -121,7 +121,6 @@ export default function EventParticipantsPage() {
     return (
         <div className="container" style={{ paddingBottom: '4rem' }}>
             <div className="animate-fade-in">
-                {/* Breadcrumb Navigation */}
                 <div className="breadcrumb">
                     <Link to="/" className="breadcrumb-link">
                         <Home size={16} />
@@ -135,7 +134,6 @@ export default function EventParticipantsPage() {
                     <span className="breadcrumb-current">Participantes</span>
                 </div>
 
-                {/* Page Header */}
                 <div className="page-header">
                     <div>
                         <h1 className="page-title">
@@ -149,9 +147,7 @@ export default function EventParticipantsPage() {
                     </button>
                 </div>
 
-                {/* Drag and Drop Section */}
                 <div className="participants-manager">
-                    {/* Available Participants */}
                     <div className="glass-panel participants-panel">
                         <h3 className="panel-title">
                             <UserPlus size={20} />
@@ -193,7 +189,6 @@ export default function EventParticipantsPage() {
                         </div>
                     </div>
 
-                    {/* Event Participants */}
                     <div
                         ref={dropZoneRef}
                         className={`glass-panel participants-panel drop-zone ${isDragOverDrop ? 'drop-zone-active' : ''}`}

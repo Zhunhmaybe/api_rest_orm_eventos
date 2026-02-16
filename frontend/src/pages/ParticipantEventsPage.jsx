@@ -89,19 +89,13 @@ export default function ParticipantEventsPage() {
     return (
         <div className="container" style={{ paddingBottom: '4rem' }}>
             <div className="animate-fade-in">
-                {/* Header Section */}
                 <div className="page-header">
                     <div>
                         <h1 className="page-title">Portal del Participante</h1>
                         <p className="page-subtitle">Bienvenido, {user.nombre}</p>
-                    </div>
-                    <button className="btn btn-secondary" onClick={logout}>
-                        <LogOut size={18} style={{ marginRight: '0.5rem' }} />
-                        Cerrar Sesión
-                    </button>
+                    </div>                    
                 </div>
 
-                {/* Navigation Tabs */}
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
                     <button
                         onClick={() => setView('available')}

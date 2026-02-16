@@ -8,6 +8,7 @@ import EventParticipantsPage from './pages/EventParticipantsPage';
 import ParticipantManagerPage from './pages/ParticipantManagerPage';
 import RoomManagerPage from './pages/RoomManagerPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import ParticipantEventsPage from './pages/ParticipantEventsPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './App.css';
@@ -43,6 +44,7 @@ function AppContent() {
         {/* Public Routes */}
         <Route path="/" element={!user ? <WelcomePage /> : <Navigate to={user.role === 'participante' ? "/mis-eventos" : "/eventos"} />} />
         <Route path="/login" element={!user ? <LoginPage /> : <Navigate to={user.role === 'participante' ? "/mis-eventos" : "/eventos"} />} />
+        <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to={user.role === 'participante' ? "/mis-eventos" : "/eventos"} />} />
 
         {/* Participante Routes */}
         <Route path="/mis-eventos" element={
